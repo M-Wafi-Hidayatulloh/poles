@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="bg-ink-900 text-paper">
+    <section className="bg-ink-900 text-paper dark:bg-[#0b1116]">
       <div className="mx-auto grid max-w-5xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-teal-bright">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/", label: "Beranda" },
@@ -12,6 +13,10 @@ const navItems = [
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <header className="border-b border-line bg-paper dark:border-ink-700 dark:bg-ink-900">
@@ -28,9 +33,16 @@ export default function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm text-ink-700 transition-colors hover:text-ink-900 dark:text-paper/80 dark:hover:text-paper"
+              className={`relative text-sm transition-colors ${
+                isActive(item.href)
+                  ? "font-medium text-ink-900 dark:text-paper"
+                  : "text-ink-700 hover:text-ink-900 dark:text-paper/80 dark:hover:text-paper"
+              }`}
             >
               {item.label}
+              {isActive(item.href) && (
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-teal" />
+              )}
             </Link>
           ))}
           <Link
@@ -81,7 +93,11 @@ export default function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="text-sm text-ink-700 dark:text-paper/80"
+                className={`text-sm ${
+                  isActive(item.href)
+                    ? "font-medium text-teal"
+                    : "text-ink-700 dark:text-paper/80"
+                }`}
               >
                 {item.label}
               </Link>

@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Poles — ATS Resume & Portfolio Generator
 
-## Getting Started
+Poles membantu fresh graduate dan job seeker menulis resume yang profesional dan lolos sistem ATS. User cukup bercerita dengan bahasa sehari-hari, lalu sistem merapikannya menjadi poin-poin resume yang siap dilamar.
 
-First, run the development server:
+Dibangun dengan **Next.js 16** (App Router) + **Tailwind CSS v4** + **TypeScript**.
+
+## Menjalankan secara lokal
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000). Catatan: jika port 3000 terpakai, gunakan `npm run dev -- -p 3100`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Script
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Perintah        | Fungsi                                  |
+| --------------- | --------------------------------------- |
+| `npm run dev`   | Menjalankan server development          |
+| `npm run build` | Build production (Turbopack)            |
+| `npm run start` | Menjalankan hasil build di lokal        |
+| `npm run lint`  | Menjalankan ESLint                      |
 
-## Learn More
+## Struktur folder
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  page.tsx            Beranda
+  generator/page.tsx  Generator resume
+  checker/page.tsx    Cek skor ATS
+  dashboard/page.tsx  Dashboard (resume tersimpan)
+components/
+  SiteHeader.tsx      Nav (logo, menu, tombol Coba Gratis, hamburger)
+  home/               Bagian-bagian halaman Beranda
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Navigasi antar halaman memakai `<Link>` dari `next/link`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Desain
 
-## Deploy on Vercel
+Design tokens (warna, font, prinsip visual) mengikuti `DESIGN.md` — lihat spesifikasi lengkap di `brief-project-poles.md`. Font: Fraunces (display), IBM Plex Sans (body/UI), IBM Plex Mono (elemen ATS).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Repo terhubung ke Vercel; setiap push ke `main` otomatis memicu production deploy.
