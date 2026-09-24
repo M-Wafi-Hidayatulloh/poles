@@ -44,3 +44,13 @@ Design tokens (warna, font, prinsip visual) mengikuti `DESIGN.md` — lihat spes
 ## Deploy
 
 Repo terhubung ke Vercel; setiap push ke `main` otomatis memicu production deploy.
+
+## Akun & Dashboard (Supabase)
+
+Fitur akun & dashboard memakai Supabase (auth + database). Setup sekali:
+
+1. Buat project di [app.supabase.com](https://app.supabase.com).
+2. Salin `.env.example` menjadi `.env.local`, isi `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` (menu *Project Settings > API*).
+3. Jalankan `supabase/schema.sql` di SQL Editor project (membuat tabel `profiles`, `resumes`, trigger profil otomatis, dan RLS).
+
+Tanpa keys ini, aplikasi tetap berjalan — halaman Dashboard menampilkan pesan konfigurasi, dan tombol simpan di Generator mengarahkan ke halaman Masuk.

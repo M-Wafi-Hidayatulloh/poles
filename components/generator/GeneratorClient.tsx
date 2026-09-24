@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { exportPdf, exportWord } from "@/lib/exporters";
 import type { ResumeResult } from "@/lib/mock-generator";
 
 type Status = "idle" | "loading" | "done";
+type SaveState = "idle" | "saving" | "done" | "error";
+
+const DEFAULT_STORY =
+  "Saya pernah magang 6 bulan di startup edtech. Saya bantuin tim bikin fitur baru dan sering ngobrol sama user biar tahu masalahnya.";
 
 const inputClass =
   "mt-2 w-full rounded-[4px] border border-line bg-paper p-3 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-500 focus:border-teal dark:border-ink-700 dark:bg-ink-900 dark:text-paper dark:placeholder:text-paper/40";
@@ -12,16 +17,21 @@ const inputClass =
 const selectClass =
   "mt-2 w-full rounded-[4px] border border-line bg-paper px-3 py-2.5 text-sm text-ink-900 outline-none transition-colors focus:border-teal dark:border-ink-700 dark:bg-ink-900 dark:text-paper";
 
-export default function GeneratorClient() {
-  const [story, setStory] = useState(
-    "Saya pernah magang 6 bulan di startup edtech. Saya bantuin tim bikin fitur baru dan sering ngobrol sama user biar tahu masalahnya."
-  );
+export default function GeneratorClient({
+  initialStory,
+}: {
+  initialStory?: string;
+}) {
+  const router = useRouter();
+  const [story, setStory] = useState(initialStory ?? DEFAULT_STORY);
   const [tone, setTone] = useState("profesional");
   const [language, setLanguage] = useState("id");
   const [jobDescription, setJobDescription] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<ResumeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +60,42 @@ export default function GeneratorClient() {
       exportPdf("Resume", result);
     } else {
       await exportWord("Resume", result);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result || saveState === "saving") return;
+    setSaveState("saving");
+    setSaveMessage(null);
+    try {
+      const meRes = await fetch("/api/me");
+      const me = await meRes.json();
+      if (!me.user) {
+        router.push(`/login?next=${encodeURIComponent("/generator")}`);
+        return;
+      }
+      const res = await fetch("/api/resumes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Resume",
+          story,
+          bullets: result.bullets,
+          keywords: result.keywords,
+          score: result.score,
+          tone,
+          language,
+          jobDescription,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan.");
+      setSaveState("done");
+    } catch (err) {
+      setSaveState("error");
+      setSaveMessage(
+        err instanceof Error ? err.message : "Gagal menyimpan resume."
+      );
     }
   };
 
@@ -219,6 +265,24 @@ export default function GeneratorClient() {
               >
                 Unduh Word
               </button>
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saveState === "saving" || saveState === "done"}
+                className="rounded-[4px] bg-teal px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#16634f] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saveState === "saving"
+                  ? "Menyimpan..."
+                  : saveState === "done"
+                    ? "Tersimpan ✓"
+                    : "Simpan ke Dashboard"}
+              </button>
+              {saveState === "error" && saveMessage && (
+                <p className="font-mono text-xs text-amber">{saveMessage}</p>
+              )}
             </div>
           </>
         )}

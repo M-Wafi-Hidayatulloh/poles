@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   { href: "/", label: "Beranda" },
@@ -11,9 +11,38 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
 ];
 
+interface MeUser {
+  email: string;
+  name: string;
+}
+
 export default function SiteHeader() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [user, setUser] = useState<MeUser | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/me")
+      .then((res) => res.json())
+      .then((data: { user: MeUser | null }) => {
+        if (!cancelled) setUser(data.user);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  };
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -51,6 +80,27 @@ export default function SiteHeader() {
           >
             Coba Gratis
           </Link>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="max-w-[160px] truncate font-mono text-xs text-ink-500 dark:text-paper/60">
+                {user.email}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-[4px] border border-line px-3 py-1.5 text-xs font-medium text-ink-900 transition-colors hover:bg-paper-dim dark:border-ink-700 dark:text-paper dark:hover:bg-ink-700"
+              >
+                Keluar
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-[4px] border border-line px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-paper-dim dark:border-ink-700 dark:text-paper dark:hover:bg-ink-700"
+            >
+              Masuk
+            </Link>
+          )}
         </nav>
 
         <button
@@ -109,6 +159,26 @@ export default function SiteHeader() {
             >
               Coba Gratis
             </Link>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  handleLogout();
+                }}
+                className="inline-flex w-fit rounded-[4px] border border-line px-4 py-2 text-sm font-medium text-ink-900 dark:border-ink-700 dark:text-paper"
+              >
+                Keluar ({user.email})
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="inline-flex w-fit rounded-[4px] border border-line px-4 py-2 text-sm font-medium text-ink-900 dark:border-ink-700 dark:text-paper"
+              >
+                Masuk
+              </Link>
+            )}
           </nav>
         </div>
       )}
